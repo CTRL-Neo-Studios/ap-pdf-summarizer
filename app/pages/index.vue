@@ -25,7 +25,8 @@ const arrows = ref(50)
         <div class="text-center py-12">
             <h1 class="text-4xl font-bold mb-3 flex items-center justify-center gap-3">
                 <UIcon name="i-lucide-notebook" class="text-primary" />
-                AP Textbook Summarizer</h1>
+                AP Textbook Summarizer
+            </h1>
             <p class="text-lg text-neutral flex items-center justify-center gap-4">
                 Get AI-powered, detailed, structured summaries for your AP textbook <UColorModeSwitch></UColorModeSwitch>
             </p>

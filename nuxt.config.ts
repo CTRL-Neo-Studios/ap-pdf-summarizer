@@ -17,5 +17,9 @@ export default defineNuxtConfig({
       '@nuxt/icon',
       '@nuxt/fonts',
       'nuxt-authorization',
+      '@nuxthub/core',
     ],
+    hub: {
+        db: 'postgresql'
+    }
 })
