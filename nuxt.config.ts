@@ -21,5 +21,11 @@ export default defineNuxtConfig({
     ],
     hub: {
         db: 'postgresql'
+    },
+    runtimeConfig: {
+        openrouter: {
+            apiKey: '',
+            modelId: ''
+        }
     }
 })

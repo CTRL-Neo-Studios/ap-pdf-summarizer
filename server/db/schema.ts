@@ -1,5 +1,6 @@
 import {pgTable, timestamp, text, uuid, boolean, bigserial, json} from 'drizzle-orm/pg-core'
 import {relations} from "drizzle-orm";
+import type { ProfileMetadata } from '#shared/types/user'
 
 // Tables
 
@@ -18,7 +19,7 @@ export const profiles = pgTable('profiles', {
     username: text().notNull(),
     bio: text(),
     userId: uuid().notNull().references(() => users.id, {onDelete: 'cascade'}),
-    metadata: json('metadata'),
+    metadata: json('metadata').$type<ProfileMetadata>(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull().$onUpdateFn(() => new Date()),
 })
@@ -31,14 +32,12 @@ export const sessions = pgTable('sessions', {
     expiresAt: timestamp({ withTimezone: true }).notNull()
 })
 
-export const posts = pgTable('post', {
+export const summaries = pgTable('summaries', {
     id: uuid().primaryKey().defaultRandom(),
-    title: text().notNull(),
-    slug: text().notNull(),
-    content: text(),
-    authorId: uuid().references(() => users.id, {onDelete: 'set null'}),
+    userId: uuid().notNull().references(() => users.id, {onDelete: 'cascade'}),
+    name: text().notNull().default('Untitled Summary'),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull().$onUpdateFn(() => new Date()),
 })
 
 // Relations
@@ -61,10 +60,3 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
         references: [users.id],
     })
 }))
-
-export const postsRelations = relations(posts, ({ one }) => ({
-    author: one(users, {
-        fields: [posts.authorId],
-        references: [users.id],
-    }),
-}));
