@@ -20,7 +20,8 @@ export default defineNuxtConfig({
       '@nuxthub/core',
     ],
     hub: {
-        db: 'postgresql'
+        db: 'postgresql',
+        blob: true
     },
     runtimeConfig: {
         openrouter: {
