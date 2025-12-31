@@ -1,7 +1,8 @@
 export function useSummaries() {
     async function getSummary(summaryId: string) {
         return await $fetch(`/api/v1/summaries/${summaryId}`, {
-            method: 'get'
+            method: 'get',
+            headers: useRequestHeaders(['cookie'])
         })
     }
 
@@ -19,7 +20,8 @@ export function useSummaries() {
                 values: {
                     userId: userId
                 } satisfies SummaryInsert
-            }
+            },
+            headers: useRequestHeaders(['cookie'])
         })
     }
 
@@ -28,7 +30,8 @@ export function useSummaries() {
             method: 'patch',
             body: {
                 values: values
-            }
+            },
+            headers: useRequestHeaders(['cookie'])
         })
     }
 
@@ -37,7 +40,8 @@ export function useSummaries() {
             method: 'delete',
             query: {
                 ids: summaryIds
-            }
+            },
+            headers: useRequestHeaders(['cookie'])
         })
     }
 

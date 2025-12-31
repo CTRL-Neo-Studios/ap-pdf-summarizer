@@ -7,7 +7,8 @@ export function useAuth() {
             body: {
                 email: email,
                 password: password
-            }
+            },
+            headers: useRequestHeaders(['cookie'])
         })
     }
 
@@ -18,19 +19,22 @@ export function useAuth() {
                 email: email,
                 password: password,
                 username: username
-            }
+            },
+            headers: useRequestHeaders(['cookie'])
         })
     }
 
     async function me() {
         return await $fetch('/api/v1/auth/me', {
-            method: 'get'
+            method: 'get',
+            headers: useRequestHeaders(['cookie'])
         })
     }
 
     async function signout() {
         return await $fetch('/api/v1/auth/signout', {
-            method: 'post'
+            method: 'post',
+            headers: useRequestHeaders(['cookie'])
         })
     }
 
