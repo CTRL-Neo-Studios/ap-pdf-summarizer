@@ -1,0 +1,56 @@
+import { db as $db } from 'hub:db'
+import { and, eq, inArray } from 'drizzle-orm'
+import { summaries } from 'hub:db:schema'
+import { SummaryInsert } from '#shared/types/db'
+
+export function useServerSummaries() {
+
+    async function getSummaries(userId: string) {
+        return await $db.query.summaries.findMany({
+            where: eq(summaries.userId, userId)
+        }).execute()
+    }
+
+    async function getSummary(userId: string, summaryId: string) {
+        return await $db.query.summaries.findFirst({
+            where: and(eq(summaries.userId, userId), eq(summaries.id, summaryId))
+        })
+    }
+
+    async function editSummary(userId: string, summaryId: string, summary: SummaryInsert) {
+        return await $db.update(summaries)
+            .set(summary)
+            .where(
+                and(
+                    eq(summaries.userId, userId),
+                    eq(summaries.id, summaryId)
+                )
+            )
+            .returning()
+    }
+
+    async function deleteSummaries(userId: string, summaryIds: string[]) {
+        return await $db.delete(summaries)
+            .where(
+                and(
+                    eq(summaries.userId, userId),
+                    inArray(summaries.id, summaryIds)
+                )
+            )
+            .returning()
+    }
+
+    async function createSummary(userId: string, values: SummaryInsert) {
+        const { id, createdAt, updatedAt, userId: uid, ...safeValues } = values
+        const [row] = await $db.insert(summaries).values({...safeValues, userId: userId}).returning()
+        return row
+    }
+
+    return {
+        getSummaries,
+        getSummary,
+        editSummary,
+        deleteSummaries,
+        createSummary
+    }
+}

@@ -1,10 +1,9 @@
-import { useServerDb } from '~~/server/utils/core/useServerDb'
+import { db as $db } from 'hub:db'
 import { H3Event } from 'h3'
 import { sessions, users, profiles } from '~~/server/db/schema'
 import { eq, and, gt } from 'drizzle-orm'
 
 export function useServerAuth() {
-    const $db = useServerDb()
 
     /**
      * Creates a DB session + Encrypted Cookie
@@ -79,7 +78,7 @@ export function useServerAuth() {
     async function requireUser(event: H3Event) {
         const user = await getUser(event)
 
-        if(!user) {
+        if (!user) {
             throw createError({
                 statusCode: 401,
                 statusMessage: 'Unauthorized'
@@ -89,10 +88,38 @@ export function useServerAuth() {
         return user
     }
 
+    async function requireAdmin(event: H3Event) {
+        const user = await requireUser(event)
+
+        if (user.user.admin == true) {
+            return user
+        } else {
+            throw createError({
+                statusCode: 401,
+                statusMessage: 'Unauthorized'
+            })
+        }
+    }
+
+    async function requireAdminOrModerator(event: H3Event) {
+        const user = await requireUser(event)
+
+        if (user.user.admin == true || user.user.moderator == true) {
+            return user
+        } else {
+            throw createError({
+                statusCode: 401,
+                statusMessage: 'Unauthorized'
+            })
+        }
+    }
+
     return {
         createSession,
         getUser,
         requireUser,
+        requireAdmin,
+        requireAdminOrModerator,
         logout
     }
 }

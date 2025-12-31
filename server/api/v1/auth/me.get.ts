@@ -1,4 +1,5 @@
 import { useServerAuth } from '~~/server/utils/auth/useServerAuth'
+import { UserMe } from '#shared/types/fetch'
 
 export default defineEventHandler(async (event) => {
     const { requireUser } = useServerAuth()
@@ -12,5 +13,5 @@ export default defineEventHandler(async (event) => {
             email: data.user.email,
         },
         profile: data.profile
-    }
+    } satisfies UserMe
 })

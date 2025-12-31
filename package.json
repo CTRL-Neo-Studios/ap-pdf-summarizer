@@ -40,6 +40,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20251230.1",
     "drizzle-kit": "^0.31.8"
   },
   "trustedDependencies": [

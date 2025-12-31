@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { useServerDb } from '~~/server/utils/core/useServerDb'
+import { db as $db } from 'hub:db'
 import { users, profiles } from '~~/server/db/schema'
 import { eq } from 'drizzle-orm'
 import { useServerAuth } from '~~/server/utils/auth/useServerAuth'
@@ -11,7 +11,6 @@ const signupSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-    const $db = useServerDb()
     const { createSession } = useServerAuth()
     const body = await readValidatedBody(event, signupSchema.parse)
 

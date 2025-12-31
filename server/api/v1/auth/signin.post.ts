@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { useServerDb } from '~~/server/utils/core/useServerDb'
+import { db as $db } from 'hub:db'
 import { users } from '~~/server/db/schema'
 import { eq } from 'drizzle-orm'
 import { useServerAuth } from '~~/server/utils/auth/useServerAuth'
@@ -10,16 +10,16 @@ const loginSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-    const $db = useServerDb()
     const { createSession } = useServerAuth()
     const body = await readValidatedBody(event, loginSchema.parse)
 
     // 1. Find User
-    const user = (await $db.select().from(users)
-        .where(eq(users.email, body.email)))[0];
+    const user = await $db.query.users.findFirst({
+        where: eq(users.email, body.email)
+    });
 
     // 2. Verify Password (using nuxt-auth-utils helper)
-    if (!user || !(await verifyPassword(body.password, user.password))) {
+    if (!user || !(await verifyPassword(user.password, body.password))) {
         throw createError({
             statusCode: 401,
             statusMessage: 'Invalid Email or Password',

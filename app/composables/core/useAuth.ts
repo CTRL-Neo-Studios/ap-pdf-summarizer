@@ -1,3 +1,5 @@
+import type { UserMe } from '#shared/types/fetch'
+
 export function useAuth() {
     async function signin(email: string, password: string) {
         return await $fetch('/api/v1/auth/signin', {
@@ -26,9 +28,16 @@ export function useAuth() {
         })
     }
 
+    async function signout() {
+        return await $fetch('/api/v1/auth/signout', {
+            method: 'post'
+        })
+    }
+
     return {
         signin,
         signup,
+        signout,
         me
     }
 }
