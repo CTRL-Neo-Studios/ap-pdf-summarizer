@@ -47,7 +47,7 @@ export const summaries = pgTable('summaries', {
 export const files = pgTable('files', {
     id: uuid().primaryKey().defaultRandom(),
     userId: uuid().notNull().references(() => users.id, {onDelete: 'cascade'}),
-    summaryId: uuid().notNull().references(() => summaries.id, {onDelete: 'cascade'}),
+    summaryId: uuid().references(() => summaries.id, {onDelete: 'no action'}),
     blobPath: text().notNull(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull().$onUpdateFn(() => new Date()),

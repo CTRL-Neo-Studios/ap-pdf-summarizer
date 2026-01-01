@@ -21,7 +21,9 @@ export default defineNuxtConfig({
     ],
     hub: {
         db: 'postgresql',
-        blob: true
+        blob: {
+            driver: 'vercel-blob'
+        }
     },
     runtimeConfig: {
         openrouter: {

@@ -1,151 +1,89 @@
 <script setup lang="ts">
-const subjects = ref(['AP World History', 'AP European History', 'AP United States History', 'AP Art History'])
+import { useSummaries } from '~/composables/core/useSummaries'
+import { getFileName, streamDownload } from '~/utils/utility/filepath'
 
-const selectedSubject = ref('AP World History')
+const $route = useRoute()
+const $sum = useSummaries()
+const summaryId = computed(() => $route.params.summaryId as string)
 
-function onCreate(item: string) {
-    subjects.value.push(item)
-    selectedSubject.value = item
+const uploadedFile = ref<File | null>(null)
+const uploading = ref(false)
+const upload = useUpload(`/api/v1/summaries/${unref(summaryId)}/upload`, {
+    headers: useRequestHeaders(['cookie'])
+})
+
+const { data: summary, pending: loadingSummary, refresh: refreshSummary } = await useAsyncData(`summary.${unref(summaryId)}`, () => $sum.getSummary(unref(summaryId)))
+const { data: summaryFiles, pending: loadingSummaryFiles, refresh: refreshSummaryFiles } = await useAsyncData(`summary.${unref(summaryId)}.files`, () => $sum.getSummaryFiles(unref(summaryId)))
+const hasFiles = computed(() => (unref(summaryFiles) || []).length != 0)
+
+async function uploadFile() {
+    uploading.value = true
+    try {
+        const f = await upload(uploadedFile.value)
+        await refreshSummaryFiles()
+    } catch (e) {
+
+    } finally {
+        uploading.value = false
+    }
 }
 
-const showSettings = ref(false)
-const emDashes = ref(50)
-const showEmDashes = ref(false)
-const showArrows = ref(false)
-const arrows = ref(50)
+async function deleteFile(fileId: string) {
+    await $sum.deleteSummaryFiles(unref(summaryId), [fileId])
+    await refreshSummaryFiles()
+}
 
 </script>
 
 <template>
-    <UContainer>
-        <div class="text-center py-12">
-            <h1 class="text-4xl font-bold mb-3 flex items-center justify-center gap-3">
-                <UIcon name="i-lucide-notebook" class="text-primary" />
-                AP Textbook Summarizer
-            </h1>
-            <p class="text-lg text-neutral flex items-center justify-center gap-4">
-                Get AI-powered, detailed, structured summaries for your AP textbook <UColorModeSwitch></UColorModeSwitch>
-            </p>
-        </div>
+    <UScrollArea orientation="vertical">
+        <UMain>
+            <UPage>
+                <UCard>
+                    <template #header>
 
-        <div class="max-w-4xl mx-auto mb-6">
-            <UCard>
-                <template #header>
-                    <h2 class="text-xl font-semibold flex gap-2">
-                        <span class="text-primary">1.</span>
-                        <span>Select Your Subject</span>
-                    </h2>
-                </template>
-                <USelectMenu
-                    v-model="selectedSubject"
-                    :items="subjects"
-                    create-item
-                    placeholder="Choose your AP subject..."
-                    size="xl"
-                    @create="onCreate"
-                    :ui="{
-                        trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200'
-                    }"
-                />
-            </UCard>
-        </div>
-
-        <UCard
-            class="max-w-4xl mx-auto mt-7 justify-center"
-        >
-            <template #header>
-                <h2 class="text-xl font-semibold flex gap-2">
-                    <span class="text-primary">2.</span>
-                    <span>Upload Your Textbook & Adjust Additional Settings</span>
-                </h2>
-            </template>
-            <UFileUpload
-                label="Drop your PDF/text file here"
-                description="PDF, TXT, or DOC"
-                class="mx-auto justify-center"
-                size="xl"
-            />
-            <UCollapsible>
-                <UButton
-                    variant="ghost"
-                    class="mt-4"
-                    size="xl"
-                    @click="showSettings =!showSettings"
-                >
-                    <UIcon :name="showSettings ? 'i-lucide-chevron-up' : 'i-lucide-settings'"/>
-                    {{ showSettings ? 'Hide Settings' : 'Show Settings' }}
-                </UButton>
-                <template #content>
-                    <div v-if="showSettings" class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="font-medium text-lg">Additional Configuration</h3>
-                        <UCollapsible
-                            class="mt-3"
+                    </template>
+                    <div
+                        class="mx-auto justify-center grid grid-cols-1 gap-2"
+                        v-if="hasFiles"
+                    >
+                        <div
+                            class="rounded-lg border border-default gap-2 flex inflex-flex items-center justify-center group transition-all duration-300 p-2"
+                            v-for="(file, index) in summaryFiles"
+                            :key="index"
                         >
-                            <UButton
-                                variant="ghost"
-                                size="lg"
-                                @click="showEmDashes =!showEmDashes"
-                            >
-                                <UIcon
-                                    :name="showEmDashes ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                                />
-                                {{ showEmDashes ? 'Hide Em-Dashes' : 'Show Em-Dashes' }}
-                            </UButton>
-                            <template #content>
-                                <div class="my-4 space-y-2 mx-4">
-                                    <h3 class="font-medium text-sm">Amount of Em-dashes</h3>
-                                    <USlider
-                                        v-model="emDashes"
-                                    />
-                                </div>
-                            </template>
-                        </UCollapsible>
-                        <UCollapsible>
-                            <UButton
-                                variant="ghost"
-                                size="lg"
-                                @click="showArrows =!showArrows"
-                            >
-                                <UIcon
-                                    :name="showArrows ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                                />
-                                {{ showArrows ? 'Hide Arrows' : 'Show Arrows' }}
-                            </UButton>
-                            <template #content>
-                                <div class="my-4 space-y-2 mx-4">
-                                    <h3 class="font-medium text-sm">Amount of Arrows</h3>
-                                    <USlider
-                                        v-model="arrows"
-                                    />
-                                </div>
-                            </template>
-                        </UCollapsible>
+                            <UIcon name="i-lucide-file" class="text-neutral size-4"/>
+                            <div class="text-ellipsis overflow-hidden flex-grow">{{getFileName(file?.blobPath)}}</div>
+                            <UButton @click="streamDownload(`/blob/${file?.id}`, getFileName(file?.blobPath))" color="neutral" variant="ghost" icon="i-lucide-download" class="group-hover:opacity-100 opacity-0 transition-all duration-200"/>
+                            <UButton @click="deleteFile(file?.id)" color="error" variant="ghost" icon="i-lucide-trash-2" class="group-hover:opacity-100 opacity-0 transition-all duration-200"/>
+                        </div>
                     </div>
-                </template>
-            </UCollapsible>
-
-
-
-
-
-
-
-        </UCard>
-
-        <UCard
-            class="max-w-4xl mx-auto mt-7 justify-center"
-        >
-            <template #header>
-                <h2 class="text-xl font-semibold flex gap-2">
-                    <span class="text-primary">3.</span>
-                    <span> Edit Your Summary</span>
-                </h2>
-            </template>
-
-        </UCard>
-
-
-    </UContainer>
+                    <template v-else>
+                        <UAlert variant="subtle" title="Notice" description="You can only upload one file; after you generate the summary, you cannot upload another file after you delete the uploaded one."/>
+                        <UFileUpload
+                            label="Drop your PDF/image/text file here"
+                            description="PDF, .txt, .png, .jpeg, etc."
+                            class="mx-auto justify-center"
+                            accept=".pdf,.txt,.md,.png,.jpg,.jpeg"
+                            v-model="uploadedFile"
+                            :disabled="uploading"
+                            layout="list"
+                        >
+                            <template #files-bottom="{ removeFile, files }">
+                                <UButton
+                                    v-if="files?.length"
+                                    label="Remove all files"
+                                    color="neutral"
+                                    @click="removeFile()"
+                                />
+                            </template>
+                        </UFileUpload>
+                        <UButton @click="uploadFile" label="testupload"/>
+                    </template>
+                </UCard>
+            </UPage>
+        </UMain>
+    </UScrollArea>
 </template>
 
 <style scoped>

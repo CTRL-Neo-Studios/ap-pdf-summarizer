@@ -8,6 +8,5 @@ export default defineEventHandler(async (event) => {
 
     console.log(event.toString())
     const summaries = await $sum.getSummaries(user.user.id)
-    console.log(summaries)
     return summaries
 })

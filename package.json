@@ -25,6 +25,7 @@
     "@nuxt/ui": "^4.3.0",
     "@nuxthub/core": "0.10.4",
     "@openrouter/ai-sdk-provider": "^1.5.4",
+    "@tiptap/extension-collaboration": "^3.14.0",
     "@unhead/vue": "^2.0.19",
     "@vercel/blob": "^2.0.0",
     "ai": "^6.0.3",
@@ -40,7 +41,8 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@typescript/native-preview": "^7.0.0-dev.20251230.1",
+    "@iconify-json/lucide": "^1.2.82",
+    "@typescript/native-preview": "7.0.0-dev.20251231.1",
     "drizzle-kit": "^0.31.8"
   },
   "trustedDependencies": [

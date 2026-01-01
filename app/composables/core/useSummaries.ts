@@ -6,6 +6,13 @@ export function useSummaries() {
         })
     }
 
+    async function getSummaryFiles(summaryId: string) {
+        return await $fetch(`/api/v1/summaries/${summaryId}/files`, {
+            method: 'get',
+            headers: useRequestHeaders(['cookie'])
+        })
+    }
+
     async function getSummaries() {
         return await $fetch('/api/v1/summaries', {
             method: 'get',
@@ -45,11 +52,24 @@ export function useSummaries() {
         })
     }
 
+    async function deleteSummaryFiles(summaryId: string, fileIds: string[]) {
+        console.log('ok')
+        return await $fetch(`/api/v1/summaries/${summaryId}/files`, {
+            method: 'delete',
+            query: {
+                ids: fileIds
+            },
+            headers: useRequestHeaders(['cookie'])
+        })
+    }
+
     return {
         getSummary,
         getSummaries,
         createSummary,
         editSummary,
-        deleteSummaries
+        deleteSummaries,
+        deleteSummaryFiles,
+        getSummaryFiles
     }
 }

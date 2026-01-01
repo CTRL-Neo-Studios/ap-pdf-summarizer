@@ -13,7 +13,10 @@ export function useServerSummaries() {
 
     async function getSummary(userId: string, summaryId: string) {
         return await $db.query.summaries.findFirst({
-            where: and(eq(summaries.userId, userId), eq(summaries.id, summaryId))
+            where: and(eq(summaries.userId, userId), eq(summaries.id, summaryId)),
+            with: {
+                files: true
+            }
         })
     }
 
@@ -46,11 +49,16 @@ export function useServerSummaries() {
         return row
     }
 
+    async function hasSummary(userId: string, summaryId: string) {
+        return (await getSummary(userId, summaryId)) != null
+    }
+
     return {
         getSummaries,
         getSummary,
         editSummary,
         deleteSummaries,
-        createSummary
+        createSummary,
+        hasSummary
     }
 }
