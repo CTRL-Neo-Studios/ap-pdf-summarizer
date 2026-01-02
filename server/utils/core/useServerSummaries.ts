@@ -21,7 +21,7 @@ export function useServerSummaries() {
     }
 
     async function editSummary(userId: string, summaryId: string, summary: SummaryInsert) {
-        return await $db.update(summaries)
+        const [row] = await $db.update(summaries)
             .set(summary)
             .where(
                 and(
@@ -30,6 +30,7 @@ export function useServerSummaries() {
                 )
             )
             .returning()
+        return row
     }
 
     async function deleteSummaries(userId: string, summaryIds: string[]) {

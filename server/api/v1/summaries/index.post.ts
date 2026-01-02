@@ -3,7 +3,7 @@ import { useServerSummaries } from '~~/server/utils/core/useServerSummaries'
 import {z} from 'zod'
 
 const BodySchema = z.object({
-    values: z.custom<SummaryInsert>()
+    values: z.custom<Omit<SummaryInsert, 'userId'>>()
 })
 
 export default defineEventHandler(async (event) => {
@@ -12,6 +12,6 @@ export default defineEventHandler(async (event) => {
     const $sum = useServerSummaries()
     
     const {values} = await readValidatedBody(event, BodySchema.parse)
-
-    return await $sum.createSummary(user.user.id, values)
+    const {id, createdAt, updatedAt, ...safeValues} = values
+    return await $sum.createSummary(user.user.id, { ...safeValues, userId: user.user.id})
 })

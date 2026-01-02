@@ -1,39 +1,43 @@
+import type { SummaryFile } from '#shared/types/db'
+
 export function useSummaries() {
-    async function getSummary(summaryId: string) {
-        return await $fetch(`/api/v1/summaries/${summaryId}`, {
+    async function getSummary(summaryId: string): Promise<Summary> {
+        return await $fetch<Summary>(`/api/v1/summaries/${summaryId}`, {
             method: 'get',
             headers: useRequestHeaders(['cookie'])
         })
     }
 
     async function getSummaryFiles(summaryId: string) {
-        return await $fetch(`/api/v1/summaries/${summaryId}/files`, {
+        return await $fetch<SummaryFile[]>(`/api/v1/summaries/${summaryId}/files`, {
             method: 'get',
             headers: useRequestHeaders(['cookie'])
         })
     }
 
     async function getSummaries() {
-        return await $fetch('/api/v1/summaries', {
+        return await $fetch<Summary[]>('/api/v1/summaries', {
             method: 'get',
             headers: useRequestHeaders(['cookie'])
         })
     }
 
-    async function createSummary(userId: string) {
-        return await $fetch('/api/v1/summaries', {
+    async function createSummary(name: string = 'Untitled Summary') {
+        return await $fetch<Summary>('/api/v1/summaries', {
             method: 'post',
             body: {
                 values: {
-                    userId: userId
-                } satisfies SummaryInsert
+                    name: name,
+                    prompt: '',
+                    response: ''
+                }
             },
             headers: useRequestHeaders(['cookie'])
         })
     }
 
     async function editSummary(summaryId: string, values: SummaryInsert) {
-        return await $fetch(`/api/v1/summaries/${summaryId}`, {
+        return await $fetch<Summary>(`/api/v1/summaries/${summaryId}`, {
             method: 'patch',
             body: {
                 values: values
@@ -43,7 +47,7 @@ export function useSummaries() {
     }
 
     async function deleteSummaries(summaryIds: string[]) {
-        return await $fetch('/api/v1/summaries', {
+        return await $fetch<Summary[]>('/api/v1/summaries', {
             method: 'delete',
             query: {
                 ids: summaryIds
@@ -53,12 +57,18 @@ export function useSummaries() {
     }
 
     async function deleteSummaryFiles(summaryId: string, fileIds: string[]) {
-        console.log('ok')
-        return await $fetch(`/api/v1/summaries/${summaryId}/files`, {
+        return await $fetch<SummaryFile[]>(`/api/v1/summaries/${summaryId}/files`, {
             method: 'delete',
             query: {
                 ids: fileIds
             },
+            headers: useRequestHeaders(['cookie'])
+        })
+    }
+
+    async function generateSummary(summaryId: string) {
+        return await $fetch<Summary>(`/api/v1/summaries/${summaryId}/generate`, {
+            method: 'post',
             headers: useRequestHeaders(['cookie'])
         })
     }
@@ -70,6 +80,7 @@ export function useSummaries() {
         editSummary,
         deleteSummaries,
         deleteSummaryFiles,
-        getSummaryFiles
+        getSummaryFiles,
+        generateSummary
     }
 }

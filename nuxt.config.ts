@@ -18,6 +18,8 @@ export default defineNuxtConfig({
       '@nuxt/fonts',
       'nuxt-authorization',
       '@nuxthub/core',
+      '@vueuse/nuxt',
+      '@pinia/nuxt'
     ],
     hub: {
         db: 'postgresql',

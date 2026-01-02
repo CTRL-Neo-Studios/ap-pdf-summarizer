@@ -18,5 +18,6 @@ export default defineEventHandler(async (event) => {
     const {values} = await readValidatedBody(event, BodySchema.parse)
     const {id} = await getValidatedRouterParams(event, RouterSchema.parse)
 
+    console.log(event.toString())
     return await $sum.editSummary(user.user.id, id, values)
 })

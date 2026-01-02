@@ -27,6 +27,48 @@ export function useServerFiles() {
         })
     }
 
+    async function getFileBlobHeadsFromSummaries(userId: string, summaryIds: string[]) {
+        const fs = await $db.query.files.findMany({
+            where: and(eq(files.userId, userId), inArray(files.summaryId, summaryIds))
+        })
+
+        let fshead = []
+        for (const f of fs) {
+            fshead.push(await blob.head(f.blobPath))
+        }
+
+        console.log(fshead)
+        return fshead
+    }
+
+    async function getFileBlobsFromSummaries(userId: string, summaryIds: string[]) {
+        const fs = await $db.query.files.findMany({
+            where: and(eq(files.userId, userId), inArray(files.summaryId, summaryIds))
+        })
+
+        let fshead = []
+        for (const f of fs) {
+            fshead.push(await blob.get(f.blobPath))
+        }
+
+        console.log(fshead)
+        return fshead
+    }
+
+    async function getFileDataFromSummaries(userId: string, summaryIds: string[]) {
+        const fs = await $db.query.files.findMany({
+            where: and(eq(files.userId, userId), inArray(files.summaryId, summaryIds))
+        })
+
+        let fshead = []
+        for (const f of fs) {
+            fshead.push({ blob: await blob.get(f.blobPath), head: await blob.head(f.blobPath) })
+        }
+
+        console.log(fshead)
+        return fshead
+    }
+
     async function deleteFile(userId: string, fileId: string) {
         const [row] = await $db.delete(files)
             .where(and(
@@ -86,5 +128,8 @@ export function useServerFiles() {
         deleteFilesAndBlobs,
         getFilesFromSummaries,
         deleteBlobsFromSummaries,
+        getFileBlobHeadsFromSummaries,
+        getFileBlobsFromSummaries,
+        getFileDataFromSummaries
     }
 }

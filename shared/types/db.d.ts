@@ -7,3 +7,5 @@ export type ProfileInsert = typeof schema.profiles.$inferInsert
 export type Session = typeof schema.sessions.$inferSelect
 export type Summary = typeof schema.summaries.$inferSelect
 export type SummaryInsert = typeof schema.summaries.$inferInsert
+export type SummaryFile = typeof schema.files.$inferSelect
+export type SummaryFileInsert = typeof schema.files.$inferInsert

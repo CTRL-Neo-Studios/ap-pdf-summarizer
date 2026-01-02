@@ -40,6 +40,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
         if (user) {
             $qt.success('Successfully Signed In!')
             await navigateTo('/')
+            location.reload()
         }
     } catch (e: any) {
         $qt.error('Error signing you in', e.statusMessage)

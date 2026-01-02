@@ -7,7 +7,7 @@ const $route = useRoute()
 const summaryId = computed(() => $route.params.summaryId as string)
 const $sum = useSummaries()
 const $auth = useAuth()
-const user = ref<UserMe | null>()
+const user = ref()
 
 const creatingSummary = ref(false)
 const signingOut = ref(false)
@@ -20,7 +20,8 @@ const { data: summaries, pending: loadingSummaries, refresh, error } = await use
 
 async function newSummary() {
     creatingSummary.value = true
-    await $sum.createSummary(user.value?.profile.id)
+    // @ts-ignore
+    await $sum.createSummary(user.value?.profile?.id)
     await refresh()
     creatingSummary.value = false
 }
@@ -29,12 +30,12 @@ async function signout() {
     signingOut.value = true
     await $auth.signout()
     signingOut.value = false
-    await navigateTo('/', {replace: true})
+    location.reload()
 }
 </script>
 
 <template>
-    <UDashboardSidebar collapsible resizable class="bg-inverted/2" :ui="{ footer: 'border-t border-default' }">
+    <UDashboardSidebar :collapsible="false" resizable class="bg-inverted/2" :ui="{ footer: 'border-t border-default' }">
         <template #header="{collapsed}">
             <div class="flex items-center w-full select-none gap-2">
                 <UIcon name="i-lucide-file-text" class="size-6 text-primary"/>
@@ -61,15 +62,22 @@ async function signout() {
                     lanes: 1
                 }"
             >
-                <UButton
-                    :key="index"
-                    v-if="item"
-                    class="text-left w-full"
-                    :label="item.name || 'Untitled Summary'"
-                    :color="summaryId == item.id ? 'primary' : 'neutral'"
-                    :variant="summaryId == item.id ? 'soft' : 'ghost'"
-                    :to="`/summaries/${item.id}`"
-                />
+                <div class="w-full flex inline-flex gap-1 items-center justify-center" :key="index">
+                    <UButton
+                        v-if="item"
+                        class="text-left w-full"
+                        :label="item.name || 'Untitled Summary'"
+                        :color="summaryId == item.id ? 'primary' : 'neutral'"
+                        :variant="summaryId == item.id ? 'soft' : 'ghost'"
+                        :to="`/summaries/${item.id}`"
+                    />
+                    <UButton
+                        v-if="item && summaryId == item.id"
+                        icon="i-lucide-ellipsis"
+                        color="neutral"
+                        variant="soft"
+                    />
+                </div>
             </UScrollArea>
         </template>
 
