@@ -44,9 +44,9 @@ async function signout() {
 <template>
     <UDashboardSidebar :collapsible="false" resizable class="bg-inverted/2" :ui="{ footer: 'border-t border-default' }">
         <template #header="{collapsed}">
-            <div class="flex items-center w-full select-none gap-2">
-                <UIcon name="i-lucide-file-text" class="size-6 text-primary"/>
-                <div v-if="!collapsed" class="text-primary text-left font-bold text-lg">Summarizer</div>
+            <div class="flex items-center w-full select-none gap-1">
+                <NuxtImg src="/icon.png" class="object-contain size-8"/>
+                <div v-if="!collapsed" class="text-neutral text-left font-bold text-lg">Summarizer</div>
                 <div class="flex-grow"/>
                 <UTooltip text="New Summary">
                     <UButton :loading="creatingSummary" icon="i-lucide-plus" @click="newSummary"/>

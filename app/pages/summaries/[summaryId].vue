@@ -28,7 +28,7 @@ const summaryContent = ref<string>('')
 
 const hasFiles = computed(() => (unref(summaryFiles) || []).length > 0)
 const canGenerate = computed(() => unref(hasFiles) && summaryPrompt.value.trim().length > 0 && !unref(uploading))
-const existingChanges = ref(false)
+const existingChanges = ref(false), loadingSummary = ref(true)
 
 defineShortcuts({
     'meta_s': {
@@ -40,6 +40,7 @@ defineShortcuts({
 })
 
 onMounted(async () => {
+    loadingSummary.value = true
     await Promise.all([
         $sum.fetchSummary(unref(summaryId)),
         $sum.fetchSummaryFiles(unref(summaryId))
@@ -47,6 +48,7 @@ onMounted(async () => {
 
     summaryPrompt.value = summary.value?.prompt ?? ''
     summaryContent.value = summary.value?.response ?? ''
+    loadingSummary.value = false
 })
 
 debouncedWatch(summaryPrompt, async (value) => {
@@ -113,7 +115,14 @@ async function handleGenerateSummary() {
 </script>
 
 <template>
+    <UMain class="w-full flex items-center justify-center select-none" v-if="loadingSummary">
+        <div class="m-auto space-y-4">
+            <div class="w-full text-center text-muted text-sm">Loading Summary...</div>
+            <UProgress class="min-w-xs"/>
+        </div>
+    </UMain>
     <UScrollArea
+        v-else
         orientation="vertical"
         :ui="{
             viewport: 'relative'
