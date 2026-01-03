@@ -1,39 +1,19 @@
-# Nuxt Minimal Starter
+# AP PDF Summarizer
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## Alpha Version
+- [X] GitHub User Authentication
+- [X] One-file summary
+- [X] Prompt & Summary (rich text) editing
+- [X] Summary renaming, creating, deleting
+- [X] Auto-save summaries
+- [X] Summary search
+- [X] Basic 16MB file uploading
 
-## Setup
+## Upcoming
+- [ ] Sharing summaries between users (view only)
+- [ ] Prompt Library for users (library per user)
+- [ ] Sharing prompts between users (copy only)
+- [ ] Generation Config (dashes, length, etc.)
+- [ ] Multi-file >16MB multipart uploading
+- [ ] Streamed response generation for better UX
 
-Make sure to install dependencies:
-
-```bash
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
