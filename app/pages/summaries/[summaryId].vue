@@ -2,6 +2,7 @@
 import { useSummaries } from '~/composables/core/useSummaries'
 import { getFileName, streamDownload } from '~/utils/utility/filepath'
 import { useSummariesStore } from '~/stores/core/useSummariesStore'
+import { useQuickToasts } from '~/composables/utility/useQuickToasts'
 
 definePageMeta({
     middleware: ['valid-session']
@@ -9,6 +10,7 @@ definePageMeta({
 
 const $route = useRoute()
 const $sum = useSummariesStore()
+const $qt = useQuickToasts()
 const summaryId = computed(() => $route.params.summaryId as string)
 
 const uploadedFile = ref<File | null>(null)
@@ -17,15 +19,15 @@ const uploading = ref(false)
 const summary = $sum.getSummaryById(unref(summaryId))
 const summaryFiles = $sum.getFilesBySummaryId(unref(summaryId))
 const savingSummary = $sum.isSaving(unref(summaryId))
-const generatingSummary = computed(() => unref($sum.isGenerating(unref(summaryId))) || unref(uploading))
+const generatingSummary = computed(() => unref($sum.isGenerating(unref(summaryId))))
 const upload = useUpload(`/api/v1/summaries/${unref(summaryId)}/upload`, {
     headers: useRequestHeaders(['cookie'])
 })
 const summaryPrompt = ref<string>('')
 const summaryContent = ref<string>('')
 
-const hasFiles = computed(() => (unref(summaryFiles) || []).length != 0)
-const canGenerate = computed(() => hasFiles.value && summaryPrompt.value.trim().length > 0)
+const hasFiles = computed(() => (unref(summaryFiles) || []).length > 0)
+const canGenerate = computed(() => unref(hasFiles) && summaryPrompt.value.trim().length > 0 && !unref(uploading))
 
 
 onMounted(async () => {
@@ -43,7 +45,7 @@ debouncedWatch(summaryPrompt, async (value) => {
         await $sum.updateSummary(unref(summaryId), { prompt: value })
     }
 }, {
-    debounce: 100,
+    debounce: 500,
     maxWait: 1000
 })
 
@@ -52,7 +54,7 @@ debouncedWatch(summaryContent, async (value) => {
         await $sum.updateSummary(unref(summaryId), { response: value })
     }
 }, {
-    debounce: 100,
+    debounce: 500,
     maxWait: 1000,
 })
 
@@ -66,9 +68,10 @@ async function uploadFile() {
         // Force refresh files from server
         await $sum.fetchSummaryFiles(unref(summaryId), true)
         uploadedFile.value = null
-    } catch (e) {
+        $qt.success('File uploaded')
+    } catch (e: any) {
         console.error('Upload failed:', e)
-        // TODO: Show error toast
+        $qt.error('Failed to upload file', e.statusMessage)
     } finally {
         uploading.value = false
     }
@@ -76,11 +79,10 @@ async function uploadFile() {
 
 async function deleteFile(fileId: string) {
     try {
-        // Optimistic delete - UI updates instantly via store
         await $sum.deleteFile(unref(summaryId), fileId)
-    } catch (e) {
+    } catch (e: any) {
         console.error('Delete failed:', e)
-        // TODO: Show error toast
+        $qt.error('Failed to delete file', e.statusMessage)
     }
 }
 
@@ -89,23 +91,27 @@ async function handleGenerateSummary() {
 
     try {
         const updated = await $sum.generateSummary(unref(summaryId))
-        // Update local ref with generated content
         summaryContent.value = updated.response ?? ''
-        // TODO: Show success toast
-    } catch (e) {
+        $qt.success('Generation complete')
+    } catch (e: any) {
         console.error('Generation failed:', e)
-        // TODO: Show error toast
+        $qt.error('Failed to generate summary', e.statusMessage)
     }
 }
 
 </script>
 
 <template>
-    <UScrollArea orientation="vertical">
-        <UMain class="relative w-full">
-            <div class="absolute right-2 top-2 w-fit flex inline-flex justify-center items-center">
-                <UBadge :label="savingSummary ? 'Saving...' : 'Saved'" :color="savingSummary ? 'warning' : 'neutral'" variant="subtle"/>
-            </div>
+    <UScrollArea
+        orientation="vertical"
+        :ui="{
+            viewport: 'relative'
+        }"
+    >
+        <div class="sticky left-2 top-2 w-fit flex inline-flex justify-center items-center">
+            <UBadge :label="savingSummary ? 'Saving...' : 'Saved'" :color="savingSummary ? 'warning' : 'neutral'" variant="subtle"/>
+        </div>
+        <UMain class="w-full">
             <UPage>
                 <UPageBody>
                     <div class="max-w-4xl mx-auto sm:px-10 space-y-4">
@@ -148,7 +154,7 @@ async function handleGenerateSummary() {
                                     label="Drop your PDF/image/text file here"
                                     description="PDF, .txt, .png, .jpeg, etc."
                                     class="w-full"
-                                    accept=".pdf,.txt,.md,.png,.jpg,.jpeg"
+                                    accept="application/pdf,text/plain,text/markdown,image/png,image/jpeg"
                                     v-model="uploadedFile"
                                     :disabled="uploading"
                                     layout="list"
@@ -191,8 +197,8 @@ async function handleGenerateSummary() {
                                 v-if="!canGenerate && !generatingSummary"
                                 variant="subtle"
                                 color="warning"
-                                title="Cannot Generate"
-                                :description="!hasFiles ? 'Please upload a file first.' : 'Please enter a prompt.'"
+                                icon="i-lucide-triangle-alert"
+                                :title="!hasFiles ? 'Please upload a file first.' : 'Please enter a prompt.'"
                             />
                             <UButton
                                 @click="handleGenerateSummary"

@@ -2,9 +2,6 @@
 export default defineNuxtConfig({
     compatibilityDate: '2025-12-30',
     devtools: {enabled: true},
-    future: {
-        compatibilityVersion: 4,
-    },
     css: ['~/assets/css/main.css'],
 
     modules: [
@@ -21,16 +18,23 @@ export default defineNuxtConfig({
       '@vueuse/nuxt',
       '@pinia/nuxt'
     ],
+
     hub: {
         db: 'postgresql',
         blob: {
             driver: 'vercel-blob'
         }
     },
+
     runtimeConfig: {
         openrouter: {
             apiKey: '',
             modelId: ''
         }
-    }
+    },
+
+    app: {
+        pageTransition: { name: 'page', mode: 'out-in' },
+        layoutTransition: { name: 'layout', mode: 'out-in' },
+    },
 })

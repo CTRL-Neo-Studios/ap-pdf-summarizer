@@ -2,27 +2,34 @@
 import { useSummaries } from '~/composables/core/useSummaries'
 import { useAuth } from '~/composables/core/useAuth'
 import type { UserMe } from '#shared/types/fetch'
+import { useSummariesStore } from '~/stores/core/useSummariesStore'
+import { ModalSummaryRename, ModalSummaryDelete } from '#components'
+import type { Summary } from "#shared/types/db"
+
+const props = defineProps<{summaries: Summary[], pending: boolean, refresh(): Promise<void>}>()
 
 const $route = useRoute()
 const summaryId = computed(() => $route.params.summaryId as string)
 const $sum = useSummaries()
 const $auth = useAuth()
+const $ov = useOverlay()
 const user = ref()
 
 const creatingSummary = ref(false)
 const signingOut = ref(false)
 
+const deleteSummaryModal = $ov.create(ModalSummaryDelete)
+const renameSummaryModal = $ov.create(ModalSummaryRename)
+
 onMounted(async () => {
     user.value = await $auth.me()
 })
 
-const { data: summaries, pending: loadingSummaries, refresh, error } = await useAsyncData('data.summaries', () => $sum.getSummaries())
-
 async function newSummary() {
     creatingSummary.value = true
     // @ts-ignore
-    await $sum.createSummary(user.value?.profile?.id)
-    await refresh()
+    await $sum.createSummary()
+    await props.refresh()
     creatingSummary.value = false
 }
 
@@ -49,7 +56,7 @@ async function signout() {
 
         <template #default="{collapsed}">
             <UDashboardSearchButton/>
-            <div v-if="loadingSummaries" class="w-full inline-flex items-center justify-center">
+            <div v-if="props.pending" class="w-full inline-flex items-center justify-center">
                 <UIcon name="i-lucide-loader-circle" class="animate-spin size-4"/>
             </div>
             <UScrollArea
@@ -62,7 +69,7 @@ async function signout() {
                     lanes: 1
                 }"
             >
-                <div class="w-full flex inline-flex gap-1 items-center justify-center" :key="index">
+                <div class="w-full inline-flex gap-1 items-center justify-center group relative" :key="index">
                     <UButton
                         v-if="item"
                         class="text-left w-full"
@@ -71,12 +78,46 @@ async function signout() {
                         :variant="summaryId == item.id ? 'soft' : 'ghost'"
                         :to="`/summaries/${item.id}`"
                     />
-                    <UButton
-                        v-if="item && summaryId == item.id"
-                        icon="i-lucide-ellipsis"
-                        color="neutral"
-                        variant="soft"
-                    />
+                    <UDropdownMenu
+                        :items="[
+                            [
+                                {
+                                    label: 'Rename',
+                                    icon: 'i-lucide-pen-line',
+                                    async onSelect() {
+                                        await renameSummaryModal.open({
+                                            summaryId: item.id,
+                                            summaryName: item.name,
+                                            refreshSummaries: refresh
+                                        })
+                                        await refresh()
+                                    }
+                                }
+                            ],
+                            [
+                                {
+                                    label: 'Delete',
+                                    color: 'error',
+                                    icon: 'i-lucide-trash',
+                                    async onSelect() {
+                                        await deleteSummaryModal.open({
+                                            summaryId: item.id,
+                                            summaryName: item.name,
+                                            refreshSummaries: refresh
+                                        })
+                                    }
+                                }
+                            ]
+                        ]"
+                    >
+                        <UButton
+                            v-if="item"
+                            icon="i-lucide-ellipsis"
+                            color="neutral"
+                            variant="ghost"
+                            class="absolute right-0 z-10 group-hover:visible invisible"
+                        />
+                    </UDropdownMenu>
                 </div>
             </UScrollArea>
         </template>

@@ -1,5 +1,5 @@
 import { db as $db } from 'hub:db'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 import { summaries } from 'hub:db:schema'
 import { SummaryInsert } from '#shared/types/db'
 
@@ -7,7 +7,13 @@ export function useServerSummaries() {
 
     async function getSummaries(userId: string) {
         return await $db.query.summaries.findMany({
-            where: eq(summaries.userId, userId)
+            where: eq(summaries.userId, userId),
+            columns: {
+                prompt: false,
+                response: false,
+                config: false
+            },
+            orderBy: desc(summaries.updatedAt)
         }).execute()
     }
 

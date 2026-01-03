@@ -37,7 +37,6 @@ export function useServerFiles() {
             fshead.push(await blob.head(f.blobPath))
         }
 
-        console.log(fshead)
         return fshead
     }
 
@@ -51,7 +50,6 @@ export function useServerFiles() {
             fshead.push(await blob.get(f.blobPath))
         }
 
-        console.log(fshead)
         return fshead
     }
 
@@ -65,7 +63,6 @@ export function useServerFiles() {
             fshead.push({ blob: await blob.get(f.blobPath), head: await blob.head(f.blobPath) })
         }
 
-        console.log(fshead)
         return fshead
     }
 
@@ -118,6 +115,13 @@ export function useServerFiles() {
         return files
     }
 
+    async function deleteFilesAndBlobsFromSummaries(userId: string, summaryIds: string[]) {
+        // Deletes the blobs only, but not the entry files
+        const files = await getFilesFromSummaries(userId, summaryIds)
+        if(!files.length) return
+        return await deleteFilesAndBlobs(userId, files.map(i => i.id))
+    }
+
     return {
         addFile,
         getFile,
@@ -128,6 +132,7 @@ export function useServerFiles() {
         deleteFilesAndBlobs,
         getFilesFromSummaries,
         deleteBlobsFromSummaries,
+        deleteFilesAndBlobsFromSummaries,
         getFileBlobHeadsFromSummaries,
         getFileBlobsFromSummaries,
         getFileDataFromSummaries

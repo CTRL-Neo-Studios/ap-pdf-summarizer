@@ -4,7 +4,12 @@ import {z} from 'zod'
 import { useServerFiles } from '~~/server/utils/core/useServerFiles'
 
 const QuerySchema = z.object({
-    ids: z.array(z.uuid())
+    ids: z.union([z.uuid(), z.array(z.uuid())])
+        .transform((val) => {
+            // If it's a string, wrap it in an array.
+            // If it's already an array, leave it alone.
+            return Array.isArray(val) ? val : [val]
+        })
 })
 
 export default defineEventHandler(async (event) => {
@@ -15,9 +20,7 @@ export default defineEventHandler(async (event) => {
 
     const { ids } = await getValidatedQuery(event, QuerySchema.parse)
 
-    const summaries = await $sum.deleteSummaries(user.user.id, ids)
-    const summaryIds = summaries.map((i: any) => i.id)
+    await $file.deleteFilesAndBlobsFromSummaries(user.user.id, ids)
 
-    await $file.deleteBlobsFromSummaries(user.user.id, summaryIds)
-    return summaries
+    return await $sum.deleteSummaries(user.user.id, ids)
 })
