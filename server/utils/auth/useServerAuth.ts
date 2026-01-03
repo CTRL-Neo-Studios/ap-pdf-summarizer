@@ -114,12 +114,57 @@ export function useServerAuth() {
         }
     }
 
+    async function createOrLoginUserFromGithub(event: H3Event, githubId: number, email: string, username: string, avatar?: string) {
+        const [existingUser] = await $db.select().from(users).where(eq(users.githubId, githubId));
+        if (existingUser) {
+            const updatedExistingUser = await $db.transaction(async (tx) => {
+                // A. Update User
+                const [user] = await tx.update(users).set({
+                    email: email,
+                }).where(eq(users.githubId, githubId)).returning()
+
+                // B. Update Profile
+                await tx.update(profiles).set({
+                    username: username,
+                    avatar: avatar
+                }).where(eq(profiles.userId, user.id))
+
+                return user
+            })
+            await createSession(event, existingUser.id)
+
+            return updatedExistingUser
+        } else {
+            const newUser = await $db.transaction(async (tx) => {
+                // A. Insert User
+                const [user] = await tx.insert(users).values({
+                    email: email,
+                    githubId: githubId
+                }).returning()
+
+                // B. Insert Profile
+                await tx.insert(profiles).values({
+                    userId: user.id,
+                    username: username,
+                    avatar: avatar
+                })
+
+                return user
+            })
+
+            await createSession(event, newUser.id)
+
+            return newUser
+        }
+    }
+
     return {
         createSession,
         getUser,
         requireUser,
         requireAdmin,
         requireAdminOrModerator,
+        createOrLoginUserFromGithub,
         logout
     }
 }

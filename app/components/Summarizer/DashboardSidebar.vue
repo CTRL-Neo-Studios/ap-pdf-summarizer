@@ -74,7 +74,7 @@ async function signout() {
                         v-if="item"
                         class="text-left w-full"
                         :label="item.name || 'Untitled Summary'"
-                        :color="summaryId == item.id ? 'primary' : 'neutral'"
+                        color="neutral"
                         :variant="summaryId == item.id ? 'soft' : 'ghost'"
                         :to="`/summaries/${item.id}`"
                     />
@@ -136,13 +136,20 @@ async function signout() {
                 ]]"
             >
                 <UButton
-                    icon="i-lucide-user"
                     :label="collapsed ? undefined : (user?.profile?.username || 'Loading...')"
                     color="neutral"
                     variant="ghost"
                     class="w-full"
                     :block="collapsed"
-                />
+                >
+                    <template #leading>
+                        <UAvatar
+                            :src="user?.profile?.avatar"
+                            :alt="user?.profile?.username || 'Loading...'"
+                            icon="i-lucide-user"
+                        />
+                    </template>
+                </UButton>
             </UDropdownMenu>
         </template>
     </UDashboardSidebar>

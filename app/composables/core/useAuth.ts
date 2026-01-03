@@ -39,8 +39,6 @@ export function useAuth() {
     }
 
     return {
-        signin,
-        signup,
         signout,
         me
     }

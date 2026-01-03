@@ -1,4 +1,4 @@
-import {pgTable, timestamp, text, uuid, boolean, bigserial, json} from 'drizzle-orm/pg-core'
+import { pgTable, timestamp, text, uuid, boolean, bigserial, json, integer } from 'drizzle-orm/pg-core'
 import {relations} from "drizzle-orm";
 import type { ProfileMetadata, SummaryConfig } from '#shared/types/user'
 
@@ -7,7 +7,7 @@ import type { ProfileMetadata, SummaryConfig } from '#shared/types/user'
 export const users = pgTable('users', {
     id: uuid().primaryKey().defaultRandom(),
     email: text().unique().notNull(),
-    password: text().notNull(),
+    githubId: integer().unique().notNull(),
     admin: boolean().default(false).$defaultFn(() => false),
     moderator: boolean().default(false).$defaultFn(() => false),
     apiKey: text(),
@@ -19,6 +19,7 @@ export const profiles = pgTable('profiles', {
     id: uuid().primaryKey().defaultRandom(),
     username: text().notNull(),
     bio: text(),
+    avatar: text(),
     userId: uuid().notNull().references(() => users.id, {onDelete: 'cascade'}),
     metadata: json().$type<ProfileMetadata>(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),

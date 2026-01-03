@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1767086742152,
-      "tag": "0000_mature_skin",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1767090638977,
-      "tag": "0001_redundant_psynapse",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1767092775725,
-      "tag": "0002_shocking_wasp",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1767170602920,
-      "tag": "0003_past_jimmy_woo",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1767279270527,
-      "tag": "0004_great_mariko_yashida",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1767279970840,
-      "tag": "0005_kind_hiroim",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1767280807886,
-      "tag": "0006_wonderful_blizzard",
+      "when": 1767421728154,
+      "tag": "0000_long_pride",
       "breakpoints": true
     }
   ]

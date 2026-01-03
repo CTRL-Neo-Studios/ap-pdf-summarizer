@@ -21,17 +21,12 @@
                 variant="naked"
                 :actions="[
                     {
-                        icon: 'i-lucide-log-in',
-                        label: 'Sign In',
+                        icon: 'i-lucide-github',
+                        label: 'Sign In/Sign Up with Github',
                         variant: 'solid',
-                        to: '/signin'
-                    },
-                    {
-                        icon: 'i-lucide-user-plus',
-                        label: 'Sign Up',
-                        variant: 'subtle',
+                        to: '/api/v1/auth/github',
                         color: 'neutral',
-                        to: '/signup'
+                        external: true
                     }
                 ]"
             />

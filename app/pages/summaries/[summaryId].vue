@@ -28,7 +28,16 @@ const summaryContent = ref<string>('')
 
 const hasFiles = computed(() => (unref(summaryFiles) || []).length > 0)
 const canGenerate = computed(() => unref(hasFiles) && summaryPrompt.value.trim().length > 0 && !unref(uploading))
+const existingChanges = ref(false)
 
+defineShortcuts({
+    'meta_s': {
+        async handler() {
+            $qt.info('Auto-Save is Active.', 'Everytime you change your prompt or summary, we\'ll autosave your changes (1 second delay).')
+        },
+        usingInput: true
+    }
+})
 
 onMounted(async () => {
     await Promise.all([
@@ -43,19 +52,21 @@ onMounted(async () => {
 debouncedWatch(summaryPrompt, async (value) => {
     if (value !== summary.value?.prompt) {
         await $sum.updateSummary(unref(summaryId), { prompt: value })
+        existingChanges.value = false
     }
 }, {
-    debounce: 500,
-    maxWait: 1000
+    debounce: 1000,
+    maxWait: 2000
 })
 
 debouncedWatch(summaryContent, async (value) => {
     if (value !== summary.value?.response) {
         await $sum.updateSummary(unref(summaryId), { response: value })
+        existingChanges.value = false
     }
 }, {
-    debounce: 500,
-    maxWait: 1000,
+    debounce: 1000,
+    maxWait: 2000
 })
 
 
@@ -109,7 +120,7 @@ async function handleGenerateSummary() {
         }"
     >
         <div class="sticky left-2 top-2 w-fit flex inline-flex justify-center items-center">
-            <UBadge :label="savingSummary ? 'Saving...' : 'Saved'" :color="savingSummary ? 'warning' : 'neutral'" variant="subtle"/>
+            <UBadge :label="savingSummary ? 'Saving...' : 'Saved'" :color="savingSummary ? 'secondary' : 'neutral'" variant="subtle"/>
         </div>
         <UMain class="w-full">
             <UPage>

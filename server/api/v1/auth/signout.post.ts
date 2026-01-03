@@ -4,6 +4,6 @@ export default defineEventHandler(async (event) => {
     const { logout } = useServerAuth()
 
     await logout(event)
-
+    await sendRedirect(event, '/')
     return { success: true }
 })
