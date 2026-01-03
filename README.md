@@ -19,3 +19,6 @@
 - [ ] Model Selection
 - [ ] BYOK generation as an option
 
+## Backlog
+- [ ] Admin Panel
+
