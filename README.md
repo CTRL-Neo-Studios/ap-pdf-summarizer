@@ -16,4 +16,6 @@
 - [ ] Generation Config (dashes, length, etc.)
 - [ ] Multi-file >16MB multipart uploading
 - [ ] Streamed response generation for better UX
+- [ ] Model Selection
+- [ ] BYOK generation as an option
 
