@@ -106,7 +106,7 @@ async function handleGenerateSummary() {
         if (unref(summaryPrompt) !== summary.value?.prompt)
             await $sum.updateSummary(unref(summaryId), { prompt: unref(summaryPrompt) })
         if (unref(summaryContent) !== summary.value?.response)
-            await $sum.updateSummary(unref(summaryId), { prompt: unref(summaryContent) })
+            await $sum.updateSummary(unref(summaryId), { response: unref(summaryContent) })
 
         const updated = await $sum.generateSummary(unref(summaryId))
         summaryContent.value = updated.response ?? ''
