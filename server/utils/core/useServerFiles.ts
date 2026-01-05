@@ -21,6 +21,12 @@ export function useServerFiles() {
         })
     }
 
+    async function getFilesById(fileIds: string[]) {
+        return await $db.query.files.findMany({
+            where: inArray(files.id, fileIds)
+        })
+    }
+
     async function getFilesFromSummaries(userId: string, summaryIds: string[]) {
         return await $db.query.files.findMany({
             where: and(eq(files.userId, userId), inArray(files.summaryId, summaryIds))
@@ -135,6 +141,7 @@ export function useServerFiles() {
         deleteFilesAndBlobsFromSummaries,
         getFileBlobHeadsFromSummaries,
         getFileBlobsFromSummaries,
-        getFileDataFromSummaries
+        getFileDataFromSummaries,
+        getFilesById
     }
 }

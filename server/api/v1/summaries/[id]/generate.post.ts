@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { useServerParsing } from '~~/server/utils/utility/useServerParsing'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { blob } from 'hub:blob'
+import { summaryAbilities } from '#shared/abilities/summaryAbilities'
 
 const RouterParams = z.object({
     id: z.uuid()
@@ -20,11 +21,15 @@ export default defineEventHandler(async (event) => {
     const $rc = useRuntimeConfig()
 
     const { id } = await getValidatedRouterParams(event, RouterParams.parse)
-
-    const summary = await $sum.getSummary(user.user.id, id)
+    const [summary]: Summary[] = await $sum.getSummariesById([id])
+    await authorize(event, summaryAbilities().readOrUpdateOrDeleteSummary, [summary])
     const files = await $file.getFileDataFromSummaries(user.user.id, [id])
     const openrouter = createOpenRouter({
-        apiKey: $rc.openrouter.apiKey
+        apiKey: $rc.openrouter.apiKey,
+        headers: {
+            'HTTP-Referer': 'https://summarizer.ctrl-neo.dev',
+            'X-Title': 'AP PDF Summarizer'
+        }
     })
 
     if (!files || files.length === 0) {
@@ -42,16 +47,19 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        // Download file contents from blob storage
-        const fileContents = await Promise.all(
+        const results = await Promise.all(
             files.map(async (file) => {
+                if (!file.blob) return null; // Return null instead of continue
+
                 return {
                     type: 'file' as const,
-                    data: file.blob ? await file.blob.arrayBuffer() : undefined, // Convert ArrayBuffer to Uint8Array
+                    data: await file.blob.arrayBuffer(),
                     mediaType: file.head.contentType || 'application/octet-stream',
-                }
+                };
             })
-        )
+        );
+
+        const fileContents = results.filter((result) => result !== null);
 
         // Generate summary using AI SDK
         const result = await generateText({

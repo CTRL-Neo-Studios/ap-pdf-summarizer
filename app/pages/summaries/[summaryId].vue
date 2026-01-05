@@ -103,6 +103,11 @@ async function handleGenerateSummary() {
     if (!canGenerate.value) return
 
     try {
+        if (unref(summaryPrompt) !== summary.value?.prompt)
+            await $sum.updateSummary(unref(summaryId), { prompt: unref(summaryPrompt) })
+        if (unref(summaryContent) !== summary.value?.response)
+            await $sum.updateSummary(unref(summaryId), { prompt: unref(summaryContent) })
+
         const updated = await $sum.generateSummary(unref(summaryId))
         summaryContent.value = updated.response ?? ''
         $qt.success('Generation complete')

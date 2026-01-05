@@ -1,6 +1,7 @@
 import { useServerAuth } from '~~/server/utils/auth/useServerAuth'
 import { useServerSummaries } from '~~/server/utils/core/useServerSummaries'
 import {z} from 'zod'
+import { summaryAbilities } from '#shared/abilities/summaryAbilities'
 
 const BodySchema = z.object({
     values: z.custom<SummaryInsert>()
@@ -17,6 +18,10 @@ export default defineEventHandler(async (event) => {
 
     const {values} = await readValidatedBody(event, BodySchema.parse)
     const {id} = await getValidatedRouterParams(event, RouterSchema.parse)
+
+    const [s]: Summary[] = await $sum.getSummariesById([id])
+
+    await authorize(event, summaryAbilities().readOrUpdateOrDeleteSummary, [s])
 
     // console.log(event.toString())
     return await $sum.editSummary(user.user.id, id, values)

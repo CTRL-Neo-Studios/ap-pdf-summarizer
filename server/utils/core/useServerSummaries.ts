@@ -14,7 +14,7 @@ export function useServerSummaries() {
                 config: false
             },
             orderBy: desc(summaries.updatedAt)
-        }).execute()
+        })
     }
 
     async function getSummary(userId: string, summaryId: string) {
@@ -23,6 +23,13 @@ export function useServerSummaries() {
             with: {
                 files: true
             }
+        })
+    }
+
+    async function getSummariesById(summaryIds: string[], withResiduals: boolean = false) {
+        return await $db.query.summaries.findMany({
+            where: inArray(summaries.id, summaryIds),
+            ...(withResiduals ? {with: {files: true}} : {})
         })
     }
 
@@ -66,6 +73,7 @@ export function useServerSummaries() {
         editSummary,
         deleteSummaries,
         createSummary,
-        hasSummary
+        hasSummary,
+        getSummariesById
     }
 }

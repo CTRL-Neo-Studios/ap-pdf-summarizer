@@ -3,6 +3,7 @@ import { useServerAuth } from '~~/server/utils/auth/useServerAuth'
 import { useServerSummaries } from '~~/server/utils/core/useServerSummaries'
 import {z} from 'zod';
 import { useServerFiles } from '~~/server/utils/core/useServerFiles'
+import { summaryAbilities } from '#shared/abilities/summaryAbilities'
 
 const RouterParams = z.object({
     id: z.uuid()
@@ -15,11 +16,8 @@ export default defineEventHandler(async (event) => {
     const $file = useServerFiles()
     const { id } = await getValidatedRouterParams(event, RouterParams.parse)
 
-    if (!(await $sum.hasSummary(user.user.id, id)))
-        throw createError({
-            statusMessage: 'Unauthorzied',
-            statusCode: 403
-        })
+    const [summary]: Summary[] = await $sum.getSummariesById([id])
+    await authorize(event, summaryAbilities().readOrUpdateOrDeleteSummary, [summary])
 
     const blobObjects = await blob.handleUpload(event, {
         formKey: 'files',

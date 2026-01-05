@@ -2,6 +2,8 @@ import { useServerAuth } from '~~/server/utils/auth/useServerAuth'
 import { useServerSummaries } from '~~/server/utils/core/useServerSummaries'
 import {z} from 'zod'
 import { useServerFiles } from '~~/server/utils/core/useServerFiles'
+import { summaryAbilities } from '#shared/abilities/summaryAbilities'
+import { summaryFileAbilities } from '#shared/abilities/summaryFileAbilities'
 
 const QuerySchema = z.object({
     ids: z.union([z.uuid(), z.array(z.uuid())])
@@ -25,13 +27,11 @@ export default defineEventHandler(async (event) => {
     const { ids: fileIds } = await getValidatedQuery(event, QuerySchema.parse)
     const { id: summaryId } = await getValidatedRouterParams(event, RouterSchema.parse)
 
-    if (!(await $sum.hasSummary(user.user.id, summaryId)))
-        throw createError({
-            statusMessage: 'Unauthorized',
-            statusCode: 403
-        })
+    const [summary]: Summary[] = await $sum.getSummariesById([summaryId], true)
+    const files: SummaryFile[] = await $file.getFilesById(fileIds)
 
-    console.log(event.toString())
+    await authorize(event, summaryAbilities().readOrUpdateOrDeleteSummary, [summary])
+    await authorize(event, summaryFileAbilities().readOrUpdateOrDeleteSummaryFiles, files)
 
     return await $file.deleteFilesAndBlobs(user.user.id, fileIds)
 })
