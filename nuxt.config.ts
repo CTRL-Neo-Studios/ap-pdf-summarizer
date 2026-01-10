@@ -16,7 +16,8 @@ export default defineNuxtConfig({
       'nuxt-authorization',
       '@nuxthub/core',
       '@vueuse/nuxt',
-      '@pinia/nuxt'
+      '@pinia/nuxt',
+      '@nuxt/a11y',
     ],
 
     hub: {

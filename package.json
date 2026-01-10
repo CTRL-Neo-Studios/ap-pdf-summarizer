@@ -17,6 +17,7 @@
     "@ai-sdk/vue": "^3.0.3",
     "@electric-sql/pglite": "^0.3.14",
     "@noble/ciphers": "^2.1.1",
+    "@nuxt/a11y": "1.0.0-alpha.1",
     "@nuxt/fonts": "0.12.1",
     "@nuxt/icon": "2.1.1",
     "@nuxt/image": "2.0.0",
